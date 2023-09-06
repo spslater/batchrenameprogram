@@ -1,208 +1,211 @@
 package brp
 
 import (
-    "fmt"
-    "path/filepath"
-    "regexp"
-    "strings"
-    "strconv"
-    "os"
+	"fmt"
+	"os"
+	"path/filepath"
+	"regexp"
+	"strconv"
+	"strings"
 )
 
 type FileInfo struct {
-    dir string
-    name string
-    ext string
+	dir  string
+	name string
+	ext  string
 }
 
 func NewFileInfo(name string) *FileInfo {
-    dir := filepath.Dir(name)
-    ext := filepath.Ext(name)
-    base := strings.TrimSuffix(filepath.Base(name), ext)
+	dir := filepath.Dir(name)
+	ext := filepath.Ext(name)
+	base := strings.TrimSuffix(filepath.Base(name), ext)
 
-    return &FileInfo{dir: dir, name: base, ext: ext}
+	return &FileInfo{dir: dir, name: base, ext: ext}
 }
 
 func (info *FileInfo) Fullname() string {
-    if info.ext == "" {
-        return fmt.Sprintf("%v/%v", info.dir, info.name)
-    }
-    return fmt.Sprintf("%v/%v%v", info.dir, info.name, info.ext)
+	if info.ext == "" {
+		return fmt.Sprintf("%v/%v", info.dir, info.name)
+	}
+	return fmt.Sprintf("%v/%v%v", info.dir, info.name, info.ext)
 }
 
-
 type FileHistory struct {
-    original *FileInfo
-    current *FileInfo
-    previous *FileInfo
-    rename *FileInfo
-    namelist []*FileInfo
+	original *FileInfo
+	current  *FileInfo
+	previous *FileInfo
+	rename   *FileInfo
+	namelist []*FileInfo
 }
 
 func (file *FileHistory) Output() string {
-    return fmt.Sprintf("{\n %v\n %v\n %v\n %v\n %v\n}", file.original, file.current, file.previous, file.rename, file.namelist)
+	return fmt.Sprintf("{\n %v\n %v\n %v\n %v\n %v\n}", file.original, file.current, file.previous, file.rename, file.namelist)
 }
 
 func NewFileHistory(name string) *FileHistory {
-    orig := NewFileInfo(name)
-    curr := orig
-    prev := orig
-    rename := orig
-    return &FileHistory{original: orig, current: curr, previous: prev, rename: rename}
+	orig := NewFileInfo(name)
+	curr := orig
+	prev := orig
+	rename := orig
+	return &FileHistory{original: orig, current: curr, previous: prev, rename: rename}
 }
 
 func (file *FileHistory) Display() string {
-    return fmt.Sprintf("%v\n%v\n", file.current.Fullname(), file.rename.Fullname())
+	return fmt.Sprintf("%v\n%v\n", file.current.Fullname(), file.rename.Fullname())
 }
 
 func (file *FileHistory) PeakName() string {
-    return file.rename.name
+	return file.rename.name
 }
 
 func (file *FileHistory) pushName(base string) {
-    file.pushInfo(base, "")
+	file.pushInfo(base, "")
 }
 
 func (file *FileHistory) pushExt(ext string) {
-    file.pushInfo("", ext)
+	file.pushInfo("", ext)
 }
 
 func (file *FileHistory) pushInfo(base string, ext string) {
-    dir := file.rename.dir
-    if base == "" { base = file.rename.name }
-    if ext == "" { ext = file.rename.ext }
+	dir := file.rename.dir
+	if base == "" {
+		base = file.rename.name
+	}
+	if ext == "" {
+		ext = file.rename.ext
+	}
 
-    new_name := &FileInfo{dir: dir, name: base, ext: ext}
+	new_name := &FileInfo{dir: dir, name: base, ext: ext}
 
-    file.namelist = append(file.namelist, file.previous)
-    file.previous = file.rename
-    file.rename = new_name
+	file.namelist = append(file.namelist, file.previous)
+	file.previous = file.rename
+	file.rename = new_name
 }
 
 func (file *FileHistory) popInfo() bool {
-    var length int = len(file.namelist)
-    if length == 0 {
-        return false
-    }
+	var length int = len(file.namelist)
+	if length == 0 {
+		return false
+	}
 
-    file.rename = file.previous
-    file.previous = file.namelist[length-1]
-    file.namelist = file.namelist[:length-1]
+	file.rename = file.previous
+	file.previous = file.namelist[length-1]
+	file.namelist = file.namelist[:length-1]
 
-    return true
+	return true
 }
 
 func (file *FileHistory) ChangeExt(new_ext string, pattern string, match_ext bool) {
-    if new_ext[0:1] != "." {
-        new_ext = string("." + new_ext)
-    }
-    if (pattern == "" ) {
-        file.pushExt(new_ext)
-    } else {
-        var check string = file.rename.name
-        if match_ext {
-            check = file.rename.ext
-        }
-        re, err := regexp.Compile(pattern)
-        if err != nil {
-            fmt.Printf("regex err: %v\n", err)
-            file.Noop()
-        } else if re.MatchString(check) {
-            file.pushExt(new_ext)
-        } else {
-            file.Noop()
-        }
-    }
+	if new_ext[0:1] != "." {
+		new_ext = string("." + new_ext)
+	}
+	if pattern == "" {
+		file.pushExt(new_ext)
+	} else {
+		var check string = file.rename.name
+		if match_ext {
+			check = file.rename.ext
+		}
+		re, err := regexp.Compile(pattern)
+		if err != nil {
+			fmt.Printf("regex err: %v\n", err)
+			file.Noop()
+		} else if re.MatchString(check) {
+			file.pushExt(new_ext)
+		} else {
+			file.Noop()
+		}
+	}
 }
 
 func (file *FileHistory) Replace(find string, repl string) {
-    findp, err := regexp.Compile(find)
-    if err != nil {
-        fmt.Printf("error: %v\n", err)
-        return
-    }
-    new_name := findp.ReplaceAllString(file.rename.name, repl)
-    file.pushName(new_name)
+	findp, err := regexp.Compile(find)
+	if err != nil {
+		fmt.Printf("error: %v\n", err)
+		return
+	}
+	new_name := findp.ReplaceAllString(file.rename.name, repl)
+	file.pushName(new_name)
 }
 
 func insertinto(orig string, idx int, ins string) string {
-    var len = len(orig)
-    var into int
-    if idx > len { // idx is positive and past end of name
-        into = len
-    } else if idx >= 0 { // idx is positive
-        into = idx
-    } else if len*-1 > idx { // idx is negative and past beginnig of name
-        into = 0
-    } else { // idx is negative (-5, word is length 10)
-        into = len+idx
-    }
-    return orig[:into] + ins + orig[into:]
+	var len = len(orig)
+	var into int
+	if idx > len { // idx is positive and past end of name
+		into = len
+	} else if idx >= 0 { // idx is positive
+		into = idx
+	} else if len*-1 > idx { // idx is negative and past beginnig of name
+		into = 0
+	} else { // idx is negative (-5, word is length 10)
+		into = len + idx
+	}
+	return orig[:into] + ins + orig[into:]
 }
 
 func (file *FileHistory) Insert(idx int, insert string) {
-    var tmp string = insertinto(file.rename.name, idx, insert)
-    file.pushName(tmp)
+	var tmp string = insertinto(file.rename.name, idx, insert)
+	file.pushName(tmp)
 }
 
 func (file *FileHistory) Noop() {
-    file.namelist = append(file.namelist, file.previous)
-    file.previous = file.rename
+	file.namelist = append(file.namelist, file.previous)
+	file.previous = file.rename
 }
 
 func (file *FileHistory) Undo() bool {
-    return file.popInfo()
+	return file.popInfo()
 }
 
 func (file *FileHistory) Reset() {
-    file.current = file.original
-    file.namelist = make([]*FileInfo, 1)
-    file.previous = file.original
-    file.rename = file.previous
+	file.current = file.original
+	file.namelist = make([]*FileInfo, 1)
+	file.previous = file.original
+	file.rename = file.previous
 }
 
 func (file *FileHistory) Save() {
-    file.move()
-    file.current = file.rename
+	file.move()
+	file.current = file.rename
 }
 
 func (file *FileHistory) move() {
-    os.Rename(file.current.Fullname(), file.rename.Fullname())
+	os.Rename(file.current.Fullname(), file.rename.Fullname())
 }
 
 func (file *FileHistory) History() string {
-    var sb strings.Builder
-    sb.WriteString(file.Display())
-    num := len(file.namelist)
-    if file.previous != file.original {
-        num += 1
-    }
-    if num == 0 {
-        sb.WriteString("  NA\n")
-        return sb.String()
-    }
-    pad := len(strconv.Itoa(num))
-    for _, name := range file.namelist {
-        sb.WriteString(fmt.Sprintf("%*d %v\n", pad, num, name.Fullname()))
-        num--
-    }
-    sb.WriteString(fmt.Sprintf("%*d %v\n", pad, num, file.previous.Fullname()))
-    sb.WriteString(strings.Repeat("~", 20))
-    return sb.String()
+	var sb strings.Builder
+	sb.WriteString(file.Display())
+	num := len(file.namelist)
+	if file.previous != file.original {
+		num += 1
+	}
+	if num == 0 {
+		sb.WriteString("  NA\n")
+		return sb.String()
+	}
+	pad := len(strconv.Itoa(num))
+	for _, name := range file.namelist {
+		sb.WriteString(fmt.Sprintf("%*d %v\n", pad, num, name.Fullname()))
+		num--
+	}
+	sb.WriteString(fmt.Sprintf("%*d %v\n", pad, num, file.previous.Fullname()))
+	sb.WriteString(strings.Repeat("~", 20))
+	return sb.String()
 }
 
 func (file *FileHistory) ChangeCase(cases []CaseId) {
-    name := file.rename.name
-    for _, c := range cases {
-        name = ChangeCase(name, c)
-    }
-    file.pushName(name)
+	name := file.rename.name
+	for _, c := range cases {
+		name = ChangeCase(name, c)
+	}
+	file.pushName(name)
 }
 
 func (file *FileHistory) MatchName(re *regexp.Regexp) bool {
-    return re.MatchString(file.previous.name)
+	return re.MatchString(file.previous.name)
 }
 
 func (file *FileHistory) MatchExt(re *regexp.Regexp) bool {
-    return re.MatchString(file.previous.ext)
+	return re.MatchString(file.previous.ext)
 }
