@@ -16,9 +16,19 @@ func main() {
 		fmt.Println(err)
 		return
 	}
+
+	if parser.GetValue("help").(bool) {
+		fmt.Println("usage:", *parser.Usage)
+		return
+	}
+
+	if parser.GetValue("version").(bool) {
+		fmt.Println(util.Version)
+		return
+	}
+
 	filenames := parser.GetValue("filenames").([]*string)
 	if len(filenames) == 0 {
-		fmt.Println("usage:", *parser.Usage)
 		fmt.Println("need files to rename... silly")
 		return
 	}

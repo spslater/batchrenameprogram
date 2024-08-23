@@ -1,13 +1,12 @@
 package brp
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 
 	"github.com/google/shlex"
+	"github.com/chzyer/readline"
 
 	"whatno.io/batchrename/repl"
 	"whatno.io/batchrename/util"
@@ -33,29 +32,33 @@ var response = map[string]ResId{
 	"q":    Back,
 }
 
-var reader *bufio.Reader
+var reader *readline.Instance
 var unknown *repl.Repl
 
 func init() {
-	reader = bufio.NewReader(os.Stdin)
+	var err error
+	reader, err = readline.New("?? ")
+	if err != nil {
+		panic(err)
+	}
 	unknown = UnknownParser()
 }
 
-func readline(prefix string) string {
+func readrepl(prefix string) string {
 	for {
-		fmt.Print(prefix)
-		input, err := reader.ReadString('\n')
+		reader.SetPrompt(prefix)
+		input, err := reader.Readline()
 		if err != nil {
 			fmt.Printf("error: %v\n", err)
 			continue
 		}
-		return strings.TrimSpace(input)
+		return input
 	}
 }
 
 func getstring(val *string, msg string) string {
 	if val == nil {
-		return readline(msg)
+		return readrepl(msg)
 	}
 	return *val
 }
@@ -72,7 +75,7 @@ func GetResponse(r *repl.Repl, msg string) ResId {
 	var ans ResId
 	var valid bool
 	for {
-		res = strings.ToLower(readline(msg))
+		res = strings.ToLower(readrepl(msg))
 		ans, valid = response[res]
 		if !valid {
 			fmt.Println("Please enter a valid response.")
@@ -88,7 +91,7 @@ func GetConfirm(r *repl.Repl, msg string) bool {
 
 func Command(parser *repl.Repl) (*repl.Repl, []string) {
 	for {
-		input := readline(">> ")
+		input := readrepl(">> ")
 		toks, _ := shlex.Split(input)
 		if len(toks) == 0 {
 			continue
@@ -112,7 +115,7 @@ func GetExtension(args *repl.Repl) (string, string) {
 	var nopattern bool = args.GetValue("nopattern").(bool)
 
 	var raw_new *string = args.GetValue("new").(*string)
-	var new string = getstring(raw_new, "New Ext: ")
+	var new string = strings.TrimSpace(getstring(raw_new, "New Ext: "))
 
 	var pattern string = ""
 	if !nopattern {
@@ -149,7 +152,7 @@ func GetCases(args *repl.Repl) []CaseId {
 	}
 	if len(styles) == 0 || len(errs) > 0 {
 		for {
-			styles = strings.Split(readline("Styles? "), " ")
+			styles = strings.Split(readrepl("Styles? "), " ")
 			errs, good = validateCases(styles)
 			if len(errs) > 0 {
 				fmt.Printf("Invalid cases requested: %v\n", errs)
@@ -184,9 +187,7 @@ func GetAppend(args *repl.Repl) (string, string) {
 
 func GetPrepend(args *repl.Repl) (string, string) {
 	pad, pend, find := getPend(args, "prepend")
-
 	return pend + pad, find
-
 }
 
 func GetInsert(args *repl.Repl, test string) (int, string) {
@@ -199,7 +200,7 @@ func GetInsert(args *repl.Repl, test string) (int, string) {
 		var num int
 		var err error
 		if raw_idx == nil {
-			num, err = strconv.Atoi(readline("Index: "))
+			num, err = strconv.Atoi(readrepl("Index: "))
 			if err != nil {
 				fmt.Println("please enter positive or negative integer")
 				continue
@@ -230,6 +231,6 @@ func GetAutofiles(args *repl.Repl) []string {
 	if len(rawnames) > 0 {
 		return util.Derefstr(rawnames)
 	}
-	toks, _ := shlex.Split(readline("Filenames: "))
+	toks, _ := shlex.Split(readrepl("Filenames: "))
 	return toks
 }

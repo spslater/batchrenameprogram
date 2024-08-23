@@ -2,6 +2,7 @@ package brp
 
 import (
 	"whatno.io/batchrename/repl"
+	"whatno.io/batchrename/util"
 )
 
 func confirm() repl.Args {
@@ -38,8 +39,18 @@ func CliParser(args ...string) (*repl.Repl, error) {
 	// filenames, autos
 	parser := repl.NewRepl("batchrenamer", repl.CliCmd).
 		SetAliases("brp").
-		SetUsage("brp [-h] [-V] [[-a FILE] ...] filename [filename ...]").
+		SetUsage(util.Usage).
 		SetDesc("rename batches of files at one time").
+		AddArg(repl.NewBoolArg("help").
+			SetAliases("h").
+			SetExactNargs(0).
+			SetFlag(true).
+			SetHelp("display the help message")).
+		AddArg(repl.NewBoolArg("version").
+			SetAliases("V").
+			SetExactNargs(0).
+			SetFlag(true).
+			SetHelp("display the current version")).
 		AddArg(repl.NewStringSliceArg("filenames").
 			SetNargs('+').
 			SetHelp("file to load patterns from")).

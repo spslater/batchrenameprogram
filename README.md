@@ -1,10 +1,10 @@
 # Batch Rename Program
-The Batch Rename Program allows for renaming of multiple files from the command line.  
+The Batch Rename Program allows for renaming of multiple files from the command line.
 This is a rewrite in Go of the original program I wrote in Python.  
 
 ## Usage
 ```
-usage: brp [-h] [-V] [[-a FILE]...]] filename [filename ...]
+brp [-h] [-V] [[-a FILE] ...] filename [filename ...]
 
 rename batches of files at one time
 
@@ -13,9 +13,8 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  -V, --version         show program's version number and exit
-  -a [FILE ...], --auto [FILE ...]
-                        automated file to run
+  -V, --version         print the brp version number and exit
+  -a FILE, --auto FILE  automated file to run (default: None)
 ```
 
 ## Operations
@@ -84,7 +83,7 @@ append (ap) [-f FILENAMES [FILENAMES ...]] [-p PADDING] [append] [find]
   optional arguments:
     -f FILENAMES [FILENAMES ...], --filenames FILENAMES [FILENAMES ...]
                file to load patterns from
-    -p PADDING, --padding PADDING
+    -p PADDING, --padding PADDING (Default: " ")
                string to insert between the end of the filename and the value being appended
 
 prepend (p, pre) [-f FILENAMES [FILENAMES ...]] [-p PADDING] [prepend] [find]
@@ -95,8 +94,8 @@ prepend (p, pre) [-f FILENAMES [FILENAMES ...]] [-p PADDING] [prepend] [find]
   optional arguments:
     -f FILENAMES [FILENAMES ...], --filenames FILENAMES [FILENAMES ...]
                file to load patterns from
-    -p PADDING, --padding PADDING
-               string to insert between the end of the filename and the value being prepended
+    -p PADDING, --padding PADDING (Default: " ")
+               string to insert between the value being prepended and the beginning of the filename
 
 insert (i, in) [insert] [index] [-c]
   insert string, positive from begining, negative from ending
