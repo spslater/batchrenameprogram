@@ -26,7 +26,7 @@ type Pend struct {
 
 func RunCmd(cmd repl.Repl, args []string, parser repl.Repl, files []*FileHistory) bool {
 	var exit bool = false
-	err := cmd.Parse(args)
+	var err error = cmd.Parse(args)
 	if err != nil {
 		fmt.Println(err)
 		cmd.Reset()
@@ -84,7 +84,7 @@ func DoHelp(r repl.Repl, parser repl.Repl) {
 		cmds = parser.Cmds
 	} else {
 		for _, req := range reqs {
-			cmd := parser.GetCmd(req)
+			var cmd repl.Repl = parser.GetCmd(req)
 			if cmd.Id == repl.UnknownCmd {
 				errs = append(errs, req)
 			} else {
@@ -98,17 +98,17 @@ func DoHelp(r repl.Repl, parser repl.Repl) {
 
 	for _, cmd := range cmds {
 		if small {
-			usg, desc := cmd.GetUsage()
+			var usg, desc string = cmd.GetUsage()
 			fmt.Printf("  %s\n      %s\n", usg, desc)
 		} else {
-			usg, desc := cmd.GetUsage()
+			var usg, desc string = cmd.GetUsage()
 			fmt.Println(usg)
 			fmt.Printf("  %s\n", desc)
-			pos, opt := cmd.GetArgs()
+			var pos, opt []repl.Args = cmd.GetArgs()
 			if len(pos) > 0 {
 				fmt.Println("  positional arguments:")
 				for _, p := range pos {
-					pu, pd := p.GetUsage()
+					var pu, pd string = p.GetUsage()
 					if len(pu) > pad {
 						fmt.Printf("    %s\n    %-*s %s\n", pu, pad, " ", pd)
 					} else {
@@ -120,7 +120,7 @@ func DoHelp(r repl.Repl, parser repl.Repl) {
 			if len(opt) > 0 {
 				fmt.Println("  optional arguments:")
 				for _, o := range opt {
-					ou, od := o.GetUsage()
+					var ou, od string = o.GetUsage()
 					if len(ou) > pad {
 						fmt.Printf("    %s\n    %-*s %s\n", ou, pad, " ", od)
 					} else {
@@ -205,7 +205,7 @@ func readfile(filename string) []string {
 		return []string{}
 	}
 
-	scanner := bufio.NewScanner(file)
+	var scanner *bufio.Scanner = bufio.NewScanner(file)
 	for scanner.Scan() {
 		lines = append(lines, scanner.Text())
 	}
@@ -225,7 +225,7 @@ func DoAutofiles(parser repl.Repl, autofiles []string, files []*FileHistory) {
 			if len(toks) == 0 {
 				continue
 			}
-			cmd := parser.GetCmd(strings.ToLower(toks[0]))
+			var cmd repl.Repl = parser.GetCmd(strings.ToLower(toks[0]))
 			toks = toks[1:]
 			switch cmd.Id {
 			case repl.HelpCmd, repl.SaveCmd, repl.QuitCmd, repl.WriteCmd:
@@ -243,7 +243,7 @@ func DoManualAuto(parser repl.Repl, r repl.Repl, files []*FileHistory) {
 }
 
 func DoReplace(r repl.Repl, files []*FileHistory) {
-	find, repl := GetReplace(r)
+	var find, repl string = GetReplace(r)
 	for _, file := range files {
 		file.Replace(find, repl)
 	}
@@ -258,7 +258,7 @@ func filePend(filenames []string, files []*FileHistory, kind Pend) {
 				continue
 			}
 			kind.parser.Parse(toks)
-			pend, find := kind.input(kind.parser)
+			var pend, find string = kind.input(kind.parser)
 			manualPend(pend, find, kind, files)
 		}
 	}
@@ -285,7 +285,7 @@ func doPend(r repl.Repl, files []*FileHistory, kind Pend) {
 	if len(filenames) > 0 {
 		filePend(filenames, files, kind)
 	} else {
-		pend, find := kind.input(r)
+		var pend, find string = kind.input(r)
 		manualPend(pend, find, kind, files)
 	}
 }
@@ -319,7 +319,7 @@ func DoCase(r repl.Repl, files []*FileHistory) {
 
 func DoExtension(r repl.Repl, files []*FileHistory) {
 	var ext bool = r.GetValue("ext").(bool)
-	new, patt := GetExtension(r)
+	var new, patt = GetExtension(r)
 	for _, file := range files {
 		file.ChangeExt(new, patt, ext)
 	}

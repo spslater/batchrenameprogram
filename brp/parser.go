@@ -37,7 +37,7 @@ func subCommands() []repl.Repl {
 func CliParser(args ...string) (repl.Repl, error) {
 	var err error
 	// filenames, autos
-	parser := repl.NewRepl("batchrenamer", repl.CliCmd).
+	var parser repl.Repl = repl.NewRepl("batchrenamer", repl.CliCmd).
 		SetAliases("brp").
 		SetUsage(util.Usage).
 		SetDesc("rename batches of files at one time").

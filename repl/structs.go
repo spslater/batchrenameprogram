@@ -113,7 +113,7 @@ func (repl Repl) GetUsage() (string, string) {
 		names = append(names, a)
 	}
 	sort.Sort(ByCmd(names))
-	alias := strings.Join(names, ", ")
+	var alias string = strings.Join(names, ", ")
 	if len(alias) > 0 {
 		alias = "(" + alias + ")"
 	}
@@ -279,14 +279,13 @@ func (a *Arg) PartialUsage() string {
 	var usg string
 	if a.IsFlag() {
 		var fg string
-		as := a.Alias
-		sort.Sort(ByCmd(as))
-		if len(as) > 0 && len(as[0]) == 1 {
-			fg = "-" + as[0]
+		sort.Sort(ByCmd(a.Alias))
+		if len(a.Alias) > 0 && len(a.Alias[0]) == 1 {
+			fg = "-" + a.Alias[0]
 		} else {
 			fg = "--" + a.Name
 		}
-		nargs := a.GetNargs()
+		var nargs Nargs = a.GetNargs()
 		if nargs.Rep != 0 || nargs.Num != 0 {
 			usg = nargusage(strings.ToUpper(a.Name), nargs, a.IsRequired())
 		}
@@ -335,9 +334,9 @@ func (a Arg) GetUsage() (string, string) {
 	}
 	sort.Strings(short)
 	sort.Strings(long)
-	aliases := append(short, long...)
+	var aliases []string = append(short, long...)
 	sort.Sort(ByCmd(aliases))
-	alias := strings.Join(aliases, ", ")
+	var alias string = strings.Join(aliases, ", ")
 
 	return alias, a.Help
 }

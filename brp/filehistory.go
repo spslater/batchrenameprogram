@@ -16,9 +16,9 @@ type FileInfo struct {
 }
 
 func NewFileInfo(name string) FileInfo {
-	dir := filepath.Dir(name)
-	ext := filepath.Ext(name)
-	base := strings.TrimSuffix(filepath.Base(name), ext)
+	var dir string = filepath.Dir(name)
+	var ext string = filepath.Ext(name)
+	var base string = strings.TrimSuffix(filepath.Base(name), ext)
 
 	return FileInfo{dir: dir, name: base, ext: ext}
 }
@@ -43,10 +43,10 @@ func (file FileHistory) Output() string {
 }
 
 func NewFileHistory(name string) *FileHistory {
-	orig := NewFileInfo(name)
-	curr := orig
-	prev := orig
-	rename := orig
+	var orig FileInfo = NewFileInfo(name)
+	var curr FileInfo = orig
+	var prev FileInfo = orig
+	var rename FileInfo = orig
 	return &FileHistory{original: orig, current: curr, previous: prev, rename: rename}
 }
 
@@ -67,7 +67,6 @@ func (file *FileHistory) pushExt(ext string) {
 }
 
 func (file *FileHistory) pushInfo(base string, ext string) {
-	dir := file.rename.dir
 	if base == "" {
 		base = file.rename.name
 	}
@@ -75,7 +74,7 @@ func (file *FileHistory) pushInfo(base string, ext string) {
 		ext = file.rename.ext
 	}
 
-	new_name := FileInfo{dir: dir, name: base, ext: ext}
+	var new_name FileInfo = FileInfo{dir: file.rename.dir, name: base, ext: ext}
 
 	file.namelist = append(file.namelist, file.previous)
 	file.previous = file.rename
@@ -124,7 +123,7 @@ func (file *FileHistory) Replace(find string, repl string) {
 		fmt.Printf("error: %v\n", err)
 		return
 	}
-	new_name := findp.ReplaceAllString(file.rename.name, repl)
+	var new_name string = findp.ReplaceAllString(file.rename.name, repl)
 	file.pushName(new_name)
 }
 
@@ -177,7 +176,7 @@ func (file *FileHistory) move() {
 func (file FileHistory) History() string {
 	var sb strings.Builder
 	sb.WriteString(file.Display())
-	num := len(file.namelist)
+	var num int = len(file.namelist)
 	if file.previous != file.original {
 		num += 1
 	}
@@ -185,7 +184,7 @@ func (file FileHistory) History() string {
 		sb.WriteString("  NA\n")
 		return sb.String()
 	}
-	pad := len(strconv.Itoa(num))
+	var pad int = len(strconv.Itoa(num))
 	for _, name := range file.namelist {
 		sb.WriteString(fmt.Sprintf("%*d %v\n", pad, num, name.Fullname()))
 		num--
@@ -196,7 +195,7 @@ func (file FileHistory) History() string {
 }
 
 func (file *FileHistory) ChangeCase(cases []CaseId) {
-	name := file.rename.name
+	var name string = file.rename.name
 	for _, c := range cases {
 		name = ChangeCase(name, c)
 	}

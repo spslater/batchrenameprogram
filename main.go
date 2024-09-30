@@ -27,7 +27,7 @@ func main() {
 		return
 	}
 
-	filenames := parser.GetValue("filenames").([]string)
+	var filenames []string = parser.GetValue("filenames").([]string)
 	if len(filenames) == 0 {
 		fmt.Println("need files to rename... silly")
 		return
@@ -36,7 +36,7 @@ func main() {
 		files = append(files, brp.NewFileHistory(filename))
 	}
 
-	autofiles := parser.GetValue("autos").([]string)
+	var autofiles []string = parser.GetValue("autos").([]string)
 	brp.DoAutofiles(parser, autofiles, files)
 
 	var exit bool = false

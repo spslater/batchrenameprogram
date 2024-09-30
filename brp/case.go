@@ -113,17 +113,17 @@ func toDesnake(val string) string {
 }
 
 func toSquash(val string) string {
-	reg := regexp.MustCompile(`\s+`)
+	var reg *regexp.Regexp = regexp.MustCompile(`\s+`)
 	return reg.ReplaceAllString(val, "")
 }
 
 func toTrim(val string) string {
-	reg := regexp.MustCompile(`\s+`)
+	var reg *regexp.Regexp = regexp.MustCompile(`\s+`)
 	return reg.ReplaceAllString(val, " ")
 }
 
 func toCamel(val string) string {
-	toks := strings.Split(val, " ")
+	var toks []string = strings.Split(val, " ")
 	toks[0] = toLower(toks[0])
 	for i, v := range toks[1:] {
 		toks[i+1] = toTitle(v)
@@ -132,7 +132,7 @@ func toCamel(val string) string {
 }
 
 func toPascal(val string) string {
-	toks := strings.Split(val, " ")
+	var toks []string = strings.Split(val, " ")
 	for i, v := range toks {
 		toks[i] = toTitle(v)
 	}
@@ -147,6 +147,6 @@ func toUnsquash(val string) string {
 		}
 		ns.WriteRune(v)
 	}
-	reg := regexp.MustCompile(`(^\s+|\s+$)`)
+	var reg *regexp.Regexp= regexp.MustCompile(`(^\s+|\s+$)`)
 	return reg.ReplaceAllString(ns.String(), "")
 }

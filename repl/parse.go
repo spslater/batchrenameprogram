@@ -20,10 +20,10 @@ func flagName(raw string) string {
 func expandArgs(args []string) []string {
 	var newargs []string
 	for i := 0; i < len(args); i++ {
-		arg := args[i]
+		var arg string = args[i]
 		if len(arg) > 2 && arg[:1] == "-" && arg[1:2] != "-" {
 			for _, na := range strings.Split(arg, "")[1:] {
-				temp := fmt.Sprintf("-%s", na)
+				var temp string = fmt.Sprintf("-%s", na)
 				newargs = append(newargs, temp)
 			}
 		} else {
@@ -108,7 +108,7 @@ func (repl *Repl) Parse(raw []string) error {
 	for i := 0; i < len(args); i++ {
 		var arg string = args[i]
 		if arg[:1] == "-" {
-			fg := flagName(arg)
+			var fg string = flagName(arg)
 			cur, ok := flags[fg]
 			if !ok {
 				unknown = append(unknown, arg)

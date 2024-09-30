@@ -88,12 +88,12 @@ func GetConfirm(r repl.Repl, msg string) bool {
 
 func Command(parser repl.Repl) (repl.Repl, []string) {
 	for {
-		input := readrepl(">> ")
+		var input = readrepl(">> ")
 		toks, _ := shlex.Split(input)
 		if len(toks) == 0 {
 			continue
 		}
-		command := parser.GetCmd(strings.ToLower(toks[0]))
+		var command repl.Repl = parser.GetCmd(strings.ToLower(toks[0]))
 		return command, toks[1:]
 	}
 }
@@ -178,12 +178,12 @@ func getPend(args repl.Repl, pend string) (string, string, string) {
 }
 
 func GetAppend(args repl.Repl) (string, string) {
-	pad, pend, find := getPend(args, "append")
+	var pad, pend, find string = getPend(args, "append")
 	return pad + pend, find
 }
 
 func GetPrepend(args repl.Repl) (string, string) {
-	pad, pend, find := getPend(args, "prepend")
+	var pad, pend, find string = getPend(args, "prepend")
 	return pend + pad, find
 }
 
