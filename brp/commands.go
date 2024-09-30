@@ -20,11 +20,11 @@ func init() {
 
 type Pend struct {
 	side   string
-	parser *repl.Repl
-	input  func(*repl.Repl) (string, string)
+	parser repl.Repl
+	input  func(repl.Repl) (string, string)
 }
 
-func RunCmd(cmd *repl.Repl, args []string, parser *repl.Repl, files []*FileHistory) bool {
+func RunCmd(cmd repl.Repl, args []string, parser repl.Repl, files []*FileHistory) bool {
 	var exit bool = false
 	err := cmd.Parse(args)
 	if err != nil {
@@ -74,19 +74,19 @@ func RunCmd(cmd *repl.Repl, args []string, parser *repl.Repl, files []*FileHisto
 	return exit
 }
 
-func DoHelp(r *repl.Repl, parser *repl.Repl) {
+func DoHelp(r repl.Repl, parser repl.Repl) {
 	var small bool = r.GetValue("small").(bool)
-	var reqs []*string = r.GetValue("commands").([]*string)
+	var reqs []string = r.GetValue("commands").([]string)
 
-	var cmds []*repl.Repl
+	var cmds []repl.Repl
 	var errs []string
 	if len(reqs) == 0 {
 		cmds = parser.Cmds
 	} else {
 		for _, req := range reqs {
-			cmd := parser.GetCmd(*req)
+			cmd := parser.GetCmd(req)
 			if cmd.Id == repl.UnknownCmd {
-				errs = append(errs, *req)
+				errs = append(errs, req)
 			} else {
 				cmds = append(cmds, cmd)
 			}
@@ -134,7 +134,7 @@ func DoHelp(r *repl.Repl, parser *repl.Repl) {
 	}
 }
 
-func DoSave(r *repl.Repl, files []*FileHistory) {
+func DoSave(r repl.Repl, files []*FileHistory) {
 	if GetConfirm(r, "Are you sure you want to save? ") {
 		for _, file := range files {
 			file.Save()
@@ -142,11 +142,11 @@ func DoSave(r *repl.Repl, files []*FileHistory) {
 	}
 }
 
-func DoQuit(r *repl.Repl) bool {
+func DoQuit(r repl.Repl) bool {
 	return GetConfirm(r, "Are you sure you want to quit? ")
 }
 
-func DoWrite(r *repl.Repl, files []*FileHistory) bool {
+func DoWrite(r repl.Repl, files []*FileHistory) bool {
 	if GetConfirm(r, "Are you sure you want to save and quit? ") {
 		for _, file := range files {
 			file.Save()
@@ -162,7 +162,7 @@ func DoList(files []*FileHistory) {
 	}
 }
 
-func DoHistory(r *repl.Repl, files []*FileHistory) {
+func DoHistory(r repl.Repl, files []*FileHistory) {
 	var peak bool = r.GetValue("peak").(bool)
 	if peak {
 		fmt.Println(files[0].History())
@@ -173,7 +173,7 @@ func DoHistory(r *repl.Repl, files []*FileHistory) {
 	}
 }
 
-func DoUndo(r *repl.Repl, files []*FileHistory) {
+func DoUndo(r repl.Repl, files []*FileHistory) {
 	var raw *int = r.GetValue("number").(*int)
 	var num int = 0
 	if raw != nil {
@@ -188,7 +188,7 @@ func DoUndo(r *repl.Repl, files []*FileHistory) {
 	}
 }
 
-func DoReset(r *repl.Repl, files []*FileHistory) {
+func DoReset(r repl.Repl, files []*FileHistory) {
 	if GetConfirm(r, "Are you sure you want to reset? ") {
 		for _, file := range files {
 			file.Reset()
@@ -217,7 +217,7 @@ func readfile(filename string) []string {
 
 }
 
-func DoAutofiles(parser *repl.Repl, autofiles []string, files []*FileHistory) {
+func DoAutofiles(parser repl.Repl, autofiles []string, files []*FileHistory) {
 	for _, autofile := range autofiles {
 		var lines []string = readfile(autofile)
 		for _, line := range lines {
@@ -237,21 +237,21 @@ func DoAutofiles(parser *repl.Repl, autofiles []string, files []*FileHistory) {
 	}
 }
 
-func DoManualAuto(parser *repl.Repl, r *repl.Repl, files []*FileHistory) {
+func DoManualAuto(parser repl.Repl, r repl.Repl, files []*FileHistory) {
 	var filenames []string = GetAutofiles(r)
 	DoAutofiles(parser, filenames, files)
 }
 
-func DoReplace(r *repl.Repl, files []*FileHistory) {
+func DoReplace(r repl.Repl, files []*FileHistory) {
 	find, repl := GetReplace(r)
 	for _, file := range files {
 		file.Replace(find, repl)
 	}
 }
 
-func filePend(filenames []*string, files []*FileHistory, kind Pend) {
+func filePend(filenames []string, files []*FileHistory, kind Pend) {
 	for _, filename := range filenames {
-		var lines []string = readfile(*filename)
+		var lines []string = readfile(filename)
 		for _, line := range lines {
 			toks, _ := shlex.Split(line)
 			if len(toks) == 0 {
@@ -279,8 +279,8 @@ func manualPend(pend string, find string, kind Pend, files []*FileHistory) {
 	}
 }
 
-func doPend(r *repl.Repl, files []*FileHistory, kind Pend) {
-	var filenames []*string = r.GetValue("filenames").([]*string)
+func doPend(r repl.Repl, files []*FileHistory, kind Pend) {
+	var filenames []string = r.GetValue("filenames").([]string)
 
 	if len(filenames) > 0 {
 		filePend(filenames, files, kind)
@@ -290,17 +290,17 @@ func doPend(r *repl.Repl, files []*FileHistory, kind Pend) {
 	}
 }
 
-func DoAppend(r *repl.Repl, files []*FileHistory) {
+func DoAppend(r repl.Repl, files []*FileHistory) {
 	var append Pend = Pend{side: "$", parser: AppendParser(), input: GetAppend}
 	doPend(r, files, append)
 }
 
-func DoPrepend(r *repl.Repl, files []*FileHistory) {
+func DoPrepend(r repl.Repl, files []*FileHistory) {
 	var prepend Pend = Pend{side: "^", parser: PrependParser(), input: GetPrepend}
 	doPend(r, files, prepend)
 }
 
-func DoInsert(r *repl.Repl, files []*FileHistory) {
+func DoInsert(r repl.Repl, files []*FileHistory) {
 	idx, ins := GetInsert(r, files[0].PeakName())
 	if ins == "" {
 		return
@@ -310,14 +310,14 @@ func DoInsert(r *repl.Repl, files []*FileHistory) {
 	}
 }
 
-func DoCase(r *repl.Repl, files []*FileHistory) {
+func DoCase(r repl.Repl, files []*FileHistory) {
 	var req_cases []CaseId = GetCases(r)
 	for _, file := range files {
 		file.ChangeCase(req_cases)
 	}
 }
 
-func DoExtension(r *repl.Repl, files []*FileHistory) {
+func DoExtension(r repl.Repl, files []*FileHistory) {
 	var ext bool = r.GetValue("ext").(bool)
 	new, patt := GetExtension(r)
 	for _, file := range files {

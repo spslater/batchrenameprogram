@@ -9,7 +9,6 @@ import (
 	"github.com/chzyer/readline"
 
 	"whatno.io/batchrename/repl"
-	"whatno.io/batchrename/util"
 )
 
 type ResId int64
@@ -33,7 +32,6 @@ var response = map[string]ResId{
 }
 
 var reader *readline.Instance
-var unknown *repl.Repl
 
 func init() {
 	var err error
@@ -41,7 +39,6 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	unknown = UnknownParser()
 }
 
 func readrepl(prefix string) string {
@@ -63,7 +60,7 @@ func getstring(val *string, msg string) string {
 	return *val
 }
 
-func GetResponse(r *repl.Repl, msg string) ResId {
+func GetResponse(r repl.Repl, msg string) ResId {
 	if r.GetValue("confirm").(bool) {
 		return Confirm
 	}
@@ -85,11 +82,11 @@ func GetResponse(r *repl.Repl, msg string) ResId {
 	}
 }
 
-func GetConfirm(r *repl.Repl, msg string) bool {
+func GetConfirm(r repl.Repl, msg string) bool {
 	return Confirm == GetResponse(r, msg)
 }
 
-func Command(parser *repl.Repl) (*repl.Repl, []string) {
+func Command(parser repl.Repl) (repl.Repl, []string) {
 	for {
 		input := readrepl(">> ")
 		toks, _ := shlex.Split(input)
@@ -101,7 +98,7 @@ func Command(parser *repl.Repl) (*repl.Repl, []string) {
 	}
 }
 
-func GetReplace(args *repl.Repl) (string, string) {
+func GetReplace(args repl.Repl) (string, string) {
 	var raw_find *string = args.GetValue("find").(*string)
 	var raw_repl *string = args.GetValue("replace").(*string)
 
@@ -111,7 +108,7 @@ func GetReplace(args *repl.Repl) (string, string) {
 	return find, repl
 }
 
-func GetExtension(args *repl.Repl) (string, string) {
+func GetExtension(args repl.Repl) (string, string) {
 	var nopattern bool = args.GetValue("nopattern").(bool)
 
 	var raw_new *string = args.GetValue("new").(*string)
@@ -140,8 +137,8 @@ func validateCases(args []string) ([]string, []CaseId) {
 	return errs, good
 }
 
-func GetCases(args *repl.Repl) []CaseId {
-	var styles []string = util.Derefstr(args.GetValue("styles").([]*string))
+func GetCases(args repl.Repl) []CaseId {
+	var styles []string = args.GetValue("styles").([]string)
 	var errs []string
 	var good []CaseId
 	if len(styles) > 0 {
@@ -165,7 +162,7 @@ func GetCases(args *repl.Repl) []CaseId {
 	return good
 }
 
-func getPend(args *repl.Repl, pend string) (string, string, string) {
+func getPend(args repl.Repl, pend string) (string, string, string) {
 	var raw_pend *string = args.GetValue(pend).(*string)
 	var raw_find *string = args.GetValue("find").(*string)
 	var padding *string = args.GetValue("padding").(*string)
@@ -180,17 +177,17 @@ func getPend(args *repl.Repl, pend string) (string, string, string) {
 	return pad, add, find
 }
 
-func GetAppend(args *repl.Repl) (string, string) {
+func GetAppend(args repl.Repl) (string, string) {
 	pad, pend, find := getPend(args, "append")
 	return pad + pend, find
 }
 
-func GetPrepend(args *repl.Repl) (string, string) {
+func GetPrepend(args repl.Repl) (string, string) {
 	pad, pend, find := getPend(args, "prepend")
 	return pend + pad, find
 }
 
-func GetInsert(args *repl.Repl, test string) (int, string) {
+func GetInsert(args repl.Repl, test string) (int, string) {
 	var raw_ins *string = args.GetValue("insert").(*string)
 	var raw_idx *int = args.GetValue("index").(*int)
 	var confirm bool = args.GetValue("confirm").(bool)
@@ -225,11 +222,11 @@ func GetInsert(args *repl.Repl, test string) (int, string) {
 	}
 }
 
-func GetAutofiles(args *repl.Repl) []string {
-	var rawnames []*string = args.GetValue("filenames").([]*string)
+func GetAutofiles(args repl.Repl) []string {
+	var rawnames []string = args.GetValue("filenames").([]string)
 
 	if len(rawnames) > 0 {
-		return util.Derefstr(rawnames)
+		return rawnames
 	}
 	toks, _ := shlex.Split(readrepl("Filenames: "))
 	return toks

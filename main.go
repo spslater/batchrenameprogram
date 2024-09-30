@@ -18,7 +18,7 @@ func main() {
 	}
 
 	if parser.GetValue("help").(bool) {
-		fmt.Println("usage:", *parser.Usage)
+		fmt.Println("usage:", parser.Usage)
 		return
 	}
 
@@ -27,16 +27,16 @@ func main() {
 		return
 	}
 
-	filenames := parser.GetValue("filenames").([]*string)
+	filenames := parser.GetValue("filenames").([]string)
 	if len(filenames) == 0 {
 		fmt.Println("need files to rename... silly")
 		return
 	}
 	for _, filename := range filenames {
-		files = append(files, brp.NewFileHistory(*filename))
+		files = append(files, brp.NewFileHistory(filename))
 	}
 
-	autofiles := util.Derefstr(parser.GetValue("autos").([]*string))
+	autofiles := parser.GetValue("autos").([]string)
 	brp.DoAutofiles(parser, autofiles, files)
 
 	var exit bool = false

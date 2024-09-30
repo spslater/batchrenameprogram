@@ -17,26 +17,26 @@ func flagName(raw string) string {
 	}
 }
 
-func expandArgs(args []string) []*string {
-	var newargs []*string
+func expandArgs(args []string) []string {
+	var newargs []string
 	for i := 0; i < len(args); i++ {
 		arg := args[i]
 		if len(arg) > 2 && arg[:1] == "-" && arg[1:2] != "-" {
 			for _, na := range strings.Split(arg, "")[1:] {
 				temp := fmt.Sprintf("-%s", na)
-				newargs = append(newargs, &temp)
+				newargs = append(newargs, temp)
 			}
 		} else {
-			newargs = append(newargs, &args[i])
+			newargs = append(newargs, args[i])
 		}
 	}
 	return newargs
 }
 
-func gobble(args []*string, arg Args) (int, []*string, error) {
+func gobble(args []string, arg Args) (int, []string, error) {
 	var nargs Nargs = arg.GetNargs()
 	var got int
-	var gather []*string
+	var gather []string
 	var err error
 
 	eat := func(num int) {
@@ -44,13 +44,13 @@ func gobble(args []*string, arg Args) (int, []*string, error) {
 			num = math.MaxInt
 		}
 		for i := 0; i < num && i < len(args); i++ {
-			var arg string = *args[i]
+			var arg string = args[i]
 			if arg[0:1] == "-" {
 				break
 			}
 			if arg[0:1] == "/" {
 				arg = arg[1:]
-				args[i] = &arg
+				args[i] = arg
 			}
 			gather = append(gather, args[i])
 			got++
@@ -84,9 +84,9 @@ func splitArgs(args []Args) (map[string]Args, []Args) {
 
 	for _, arg := range args {
 		if arg.IsFlag() {
-			flags[*arg.GetName()] = arg
+			flags[arg.GetName()] = arg
 			for _, alias := range arg.GetAlias() {
-				flags[*alias] = arg
+				flags[alias] = arg
 			}
 		} else {
 			positionals = append(positionals, arg)
@@ -96,22 +96,22 @@ func splitArgs(args []Args) (map[string]Args, []Args) {
 }
 
 func (repl *Repl) Parse(raw []string) error {
-	var args []*string = expandArgs(raw)
+	var args []string = expandArgs(raw)
 
 	flags, positionals := splitArgs(repl.Args)
 
 	var usedFlags []Args
 	var usedPos []Args
-	var nonflags []*string
-	var unknown []*string
+	var nonflags []string
+	var unknown []string
 
 	for i := 0; i < len(args); i++ {
-		arg := *args[i]
+		var arg string = args[i]
 		if arg[:1] == "-" {
 			fg := flagName(arg)
 			cur, ok := flags[fg]
 			if !ok {
-				unknown = append(unknown, &arg)
+				unknown = append(unknown, arg)
 				continue
 			}
 			got, gather, err := gobble(args[i+1:], cur)
@@ -126,7 +126,7 @@ func (repl *Repl) Parse(raw []string) error {
 				usedFlags = append(usedFlags, cur)
 			}
 		} else {
-			nonflags = append(nonflags, &arg)
+			nonflags = append(nonflags, arg)
 		}
 	}
 	for _, pos := range positionals {

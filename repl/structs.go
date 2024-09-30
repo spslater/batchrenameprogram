@@ -5,8 +5,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-
-	"whatno.io/batchrename/util"
 )
 
 type CmdId int64
@@ -38,19 +36,18 @@ type Nargs struct {
 
 type Repl struct {
 	Id    CmdId
-	Name  *string
-	Alias []*string
-	Usage *string
-	Desc  *string
+	Name  string
+	Alias []string
+	Usage string
+	Desc  string
 	Args  []Args
-	Cmds  []*Repl
-	Idk   *Repl
+	Cmds  []Repl
 }
 
 type Arg struct {
-	Name     *string
-	Alias    []*string
-	Help     *string
+	Name     string
+	Alias    []string
+	Help     string
 	Flag     bool
 	Nargs    Nargs
 	IsSet    bool
@@ -60,9 +57,9 @@ type Arg struct {
 type Args interface {
 	String() string
 
-	GetName() *string
+	GetName() string
 	SetAliases(...string) Args
-	GetAlias() []*string
+	GetAlias() []string
 	SetHelp(string) Args
 	GetHelp() string
 	GetUsage() (string, string)
@@ -75,28 +72,30 @@ type Args interface {
 	SetRequired(bool) Args
 	IsRequired() bool
 
-	SetValue([]*string) (Args, error)
+	SetValue([]string) (Args, error)
 	SetDefault(any) Args
 
 	GetValue() any
 	Reset() error
 }
 
-func NewRepl(name string, id CmdId) *Repl {
-	return &Repl{Id: id, Name: util.Strptr(name)}
+var IdkRepl Repl
+
+func NewRepl(name string, id CmdId) Repl {
+	return Repl{Id: id, Name: name}
 }
 
-func (repl *Repl) SetAliases(aliases ...string) *Repl {
-	repl.Alias = util.Strptrs(aliases...)
+func (repl Repl) SetAliases(aliases ...string) Repl {
+	repl.Alias = aliases
 	return repl
 }
 
-func (repl *Repl) GetAliases() []*string {
+func (repl Repl) GetAliases() []string {
 	return repl.Alias
 }
 
-func (repl *Repl) SetUsage(usage string) *Repl {
-	repl.Usage = util.Strptr(usage)
+func (repl Repl) SetUsage(usage string) Repl {
+	repl.Usage = usage
 	return repl
 }
 
@@ -108,10 +107,10 @@ func (a ByCmd) Less(i, j int) bool {
 	return len(a[i]) < len(a[j]) || (len(a[i]) == len(a[j]) && a[i] < a[j])
 }
 
-func (repl *Repl) GetUsage() (string, string) {
+func (repl Repl) GetUsage() (string, string) {
 	var names []string
 	for _, a := range repl.Alias {
-		names = append(names, *a)
+		names = append(names, a)
 	}
 	sort.Sort(ByCmd(names))
 	alias := strings.Join(names, ", ")
@@ -120,7 +119,7 @@ func (repl *Repl) GetUsage() (string, string) {
 	}
 
 	for _, a := range repl.Alias {
-		names = append(names, *a)
+		names = append(names, a)
 
 	}
 
@@ -129,28 +128,28 @@ func (repl *Repl) GetUsage() (string, string) {
 		args = args + arg.PartialUsage() + " "
 	}
 
-	return *repl.Name + " " + alias + " " + args, *repl.Desc
+	return repl.Name + " " + alias + " " + args, repl.Desc
 }
 
-func (repl *Repl) GetHelp() string {
-	return *repl.Desc
-}
-
-func (repl *Repl) SetDesc(desc string) *Repl {
-	repl.Desc = util.Strptr(desc)
-	return repl
-}
-
-func (repl *Repl) GetDesc() *string {
+func (repl Repl) GetHelp() string {
 	return repl.Desc
 }
 
-func (repl *Repl) AddArg(arg Args) *Repl {
+func (repl Repl) SetDesc(desc string) Repl {
+	repl.Desc = desc
+	return repl
+}
+
+func (repl Repl) GetDesc() string {
+	return repl.Desc
+}
+
+func (repl Repl) AddArg(arg Args) Repl {
 	repl.Args = append(repl.Args, arg)
 	return repl
 }
 
-func (repl *Repl) GetArgs() ([]Args, []Args) {
+func (repl Repl) GetArgs() ([]Args, []Args) {
 	var pos []Args
 	var opt []Args
 	for _, arg := range repl.Args {
@@ -163,13 +162,13 @@ func (repl *Repl) GetArgs() ([]Args, []Args) {
 	return pos, opt
 }
 
-func (repl *Repl) GetArg(name string) Args {
+func (repl Repl) GetArg(name string) Args {
 	for _, arg := range repl.Args {
-		if name == *arg.GetName() {
+		if name == arg.GetName() {
 			return arg
 		}
 		for _, alias := range arg.GetAlias() {
-			if name == *alias {
+			if name == alias {
 				return arg
 			}
 		}
@@ -177,7 +176,7 @@ func (repl *Repl) GetArg(name string) Args {
 	return nil
 }
 
-func (repl *Repl) GetValue(name string) any {
+func (repl Repl) GetValue(name string) any {
 	// var err error
 	var val any = nil
 	var arg Args = repl.GetArg(name)
@@ -187,18 +186,18 @@ func (repl *Repl) GetValue(name string) any {
 	return val //, err
 }
 
-func (repl *Repl) GetCmd(id string) *Repl {
+func (repl Repl) GetCmd(id string) Repl {
 	for _, cmd := range repl.Cmds {
-		if id == *cmd.Name {
+		if id == cmd.Name {
 			return cmd
 		}
 		for _, alias := range cmd.Alias {
-			if id == *alias {
+			if id == alias {
 				return cmd
 			}
 		}
 	}
-	return repl.Idk
+	return IdkRepl
 }
 
 func (repl *Repl) Reset() {
@@ -207,12 +206,12 @@ func (repl *Repl) Reset() {
 	}
 }
 
-func (repl *Repl) Matches(name string) bool {
-	if *repl.Name == name {
+func (repl Repl) Matches(name string) bool {
+	if repl.Name == name {
 		return true
 	}
 	for _, alias := range repl.Alias {
-		if *alias == name {
+		if alias == name {
 			return true
 		}
 	}
@@ -221,26 +220,26 @@ func (repl *Repl) Matches(name string) bool {
 
 /* Arg Commands */
 
-func (a *Arg) GetName() *string {
+func (a Arg) GetName() string {
 	return a.Name
 }
 
 func (a *Arg) SetAliases(aliases ...string) Args {
-	a.Alias = util.Strptrs(aliases...)
+	a.Alias = aliases
 	return a
 }
 
-func (a *Arg) GetAlias() []*string {
+func (a Arg) GetAlias() []string {
 	return a.Alias
 }
 
 func (a *Arg) SetHelp(help string) Args {
-	a.Help = util.Strptr(help)
+	a.Help = help
 	return a
 }
 
-func (a *Arg) GetHelp() string {
-	return *a.Help
+func (a Arg) GetHelp() string {
+	return a.Help
 }
 
 func nargusage(meta string, nargs Nargs, req bool) string {
@@ -280,16 +279,16 @@ func (a *Arg) PartialUsage() string {
 	var usg string
 	if a.IsFlag() {
 		var fg string
-		as := util.Derefstr(a.Alias)
+		as := a.Alias
 		sort.Sort(ByCmd(as))
 		if len(as) > 0 && len(as[0]) == 1 {
 			fg = "-" + as[0]
 		} else {
-			fg = "--" + *a.Name
+			fg = "--" + a.Name
 		}
 		nargs := a.GetNargs()
 		if nargs.Rep != 0 || nargs.Num != 0 {
-			usg = nargusage(strings.ToUpper(*a.Name), nargs, a.IsRequired())
+			usg = nargusage(strings.ToUpper(a.Name), nargs, a.IsRequired())
 		}
 		if a.IsRequired() && len(usg) > 0 {
 			return fg + " " + usg
@@ -301,33 +300,33 @@ func (a *Arg) PartialUsage() string {
 			return "[" + fg + "]"
 		}
 	}
-	return nargusage(*a.Name, a.GetNargs(), a.IsRequired())
+	return nargusage(a.Name, a.GetNargs(), a.IsRequired())
 }
 
-func (a *Arg) GetUsage() (string, string) {
+func (a Arg) GetUsage() (string, string) {
 	if !a.IsFlag() {
-		return *a.GetName(), *a.Help
+		return a.GetName(), a.Help
 	}
 
 	var nargs Nargs = a.GetNargs()
 	var hasargs bool = (nargs.Rep != 0 || nargs.Num != 0)
-	var args string = nargusage(strings.ToUpper(*a.Name), nargs, a.IsRequired())
+	var args string = nargusage(strings.ToUpper(a.Name), nargs, a.IsRequired())
 
 	var short []string
 	var long []string
 
 	var tmp string
-	tmp = "--" + *a.GetName()
+	tmp = "--" + a.GetName()
 	if hasargs {
 		tmp += " " + args
 	}
 	long = append(long, tmp)
 	for _, k := range a.Alias {
-		tmp = "-" + *k
+		tmp = "-" + k
 		if hasargs {
 			tmp += " " + args
 		}
-		if len(*k) == 1 {
+		if len(k) == 1 {
 			short = append(short, tmp)
 		} else {
 			tmp = "-" + tmp
@@ -340,7 +339,7 @@ func (a *Arg) GetUsage() (string, string) {
 	sort.Sort(ByCmd(aliases))
 	alias := strings.Join(aliases, ", ")
 
-	return alias, *a.Help
+	return alias, a.Help
 }
 
 func (a *Arg) SetFlag(f bool) Args {
@@ -368,7 +367,7 @@ func (a *Arg) SetNargs(narg rune) Args {
 	return a
 }
 
-func (a *Arg) GetNargs() Nargs {
+func (a Arg) GetNargs() Nargs {
 	return a.Nargs
 }
 
@@ -381,7 +380,7 @@ func (a *Arg) IsRequired() bool {
 	return a.Required
 }
 
-func (a *Arg) SetValue(gather []*string) (Args, error) {
+func (a *Arg) SetValue(gather []string) (Args, error) {
 	return nil, errors.New("please implament value")
 }
 
@@ -389,10 +388,14 @@ func (a *Arg) SetDefault(_ any) Args {
 	return a
 }
 
-func (a *Arg) GetValue() any {
+func (a Arg) GetValue() any {
 	return nil
 }
 
 func (a *Arg) Reset() error {
 	return nil
+}
+
+func init() {
+	IdkRepl =  NewRepl("idk", UnknownCmd)
 }

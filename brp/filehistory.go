@@ -15,15 +15,15 @@ type FileInfo struct {
 	ext  string
 }
 
-func NewFileInfo(name string) *FileInfo {
+func NewFileInfo(name string) FileInfo {
 	dir := filepath.Dir(name)
 	ext := filepath.Ext(name)
 	base := strings.TrimSuffix(filepath.Base(name), ext)
 
-	return &FileInfo{dir: dir, name: base, ext: ext}
+	return FileInfo{dir: dir, name: base, ext: ext}
 }
 
-func (info *FileInfo) Fullname() string {
+func (info FileInfo) Fullname() string {
 	if info.ext == "" {
 		return fmt.Sprintf("%v/%v", info.dir, info.name)
 	}
@@ -31,14 +31,14 @@ func (info *FileInfo) Fullname() string {
 }
 
 type FileHistory struct {
-	original *FileInfo
-	current  *FileInfo
-	previous *FileInfo
-	rename   *FileInfo
-	namelist []*FileInfo
+	original FileInfo   // Name of file when started program
+	current  FileInfo   // Name of file on the file system right now (after saving before quitting)
+	previous FileInfo   // Name in program before most recent change
+	rename   FileInfo   // What will be renamed to when saving
+	namelist []FileInfo // List of all previous rename steps (including saves)
 }
 
-func (file *FileHistory) Output() string {
+func (file FileHistory) Output() string {
 	return fmt.Sprintf("{\n %v\n %v\n %v\n %v\n %v\n}", file.original, file.current, file.previous, file.rename, file.namelist)
 }
 
@@ -50,11 +50,11 @@ func NewFileHistory(name string) *FileHistory {
 	return &FileHistory{original: orig, current: curr, previous: prev, rename: rename}
 }
 
-func (file *FileHistory) Display() string {
+func (file FileHistory) Display() string {
 	return fmt.Sprintf("%v\n%v\n", file.current.Fullname(), file.rename.Fullname())
 }
 
-func (file *FileHistory) PeakName() string {
+func (file FileHistory) PeakName() string {
 	return file.rename.name
 }
 
@@ -75,7 +75,7 @@ func (file *FileHistory) pushInfo(base string, ext string) {
 		ext = file.rename.ext
 	}
 
-	new_name := &FileInfo{dir: dir, name: base, ext: ext}
+	new_name := FileInfo{dir: dir, name: base, ext: ext}
 
 	file.namelist = append(file.namelist, file.previous)
 	file.previous = file.rename
@@ -158,8 +158,9 @@ func (file *FileHistory) Undo() bool {
 }
 
 func (file *FileHistory) Reset() {
+	// TODO: Bug? If reset current, can't save changes
 	file.current = file.original
-	file.namelist = make([]*FileInfo, 1)
+	file.namelist = make([]FileInfo, 1)
 	file.previous = file.original
 	file.rename = file.previous
 }
@@ -173,7 +174,7 @@ func (file *FileHistory) move() {
 	os.Rename(file.current.Fullname(), file.rename.Fullname())
 }
 
-func (file *FileHistory) History() string {
+func (file FileHistory) History() string {
 	var sb strings.Builder
 	sb.WriteString(file.Display())
 	num := len(file.namelist)
@@ -202,10 +203,10 @@ func (file *FileHistory) ChangeCase(cases []CaseId) {
 	file.pushName(name)
 }
 
-func (file *FileHistory) MatchName(re *regexp.Regexp) bool {
+func (file FileHistory) MatchName(re *regexp.Regexp) bool {
 	return re.MatchString(file.previous.name)
 }
 
-func (file *FileHistory) MatchExt(re *regexp.Regexp) bool {
+func (file FileHistory) MatchExt(re *regexp.Regexp) bool {
 	return re.MatchString(file.previous.ext)
 }

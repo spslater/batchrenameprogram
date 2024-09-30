@@ -13,13 +13,13 @@ func (n *Nargs) String() string {
 	return fmt.Sprintf("%c", n.Rep)
 }
 
-func (a *Arg) String() string {
+func (a Arg) String() string {
 	var out strings.Builder
 	var alias []string
 	for _, a := range a.Alias {
-		alias = append(alias, *a)
+		alias = append(alias, a)
 	}
-	out.WriteString(fmt.Sprintf("Name: %s, ", *a.Name))
+	out.WriteString(fmt.Sprintf("Name: %s, ", a.Name))
 	out.WriteString(fmt.Sprintf("Alias: %s, ", alias))
 	out.WriteString(fmt.Sprintf("Flag: %t, ", a.Flag))
 	out.WriteString(fmt.Sprintf("Nargs: %s, ", a.Nargs.String()))
@@ -28,12 +28,12 @@ func (a *Arg) String() string {
 	return out.String()
 }
 
-func (r *Repl) String() string {
+func (r Repl) String() string {
 	var out strings.Builder
 	out.WriteString("{\n")
-	out.WriteString(fmt.Sprintf("  Name: %s\n", *r.Name))
-	out.WriteString(fmt.Sprintf("  Usage: %s\n", *r.Usage))
-	out.WriteString(fmt.Sprintf("  Desc: %s\n", *r.Desc))
+	out.WriteString(fmt.Sprintf("  Name: %s\n", r.Name))
+	out.WriteString(fmt.Sprintf("  Usage: %s\n", r.Usage))
+	out.WriteString(fmt.Sprintf("  Desc: %s\n", r.Desc))
 	out.WriteString("  Args: [\n")
 	for _, arg := range r.Args {
 		out.WriteString(fmt.Sprintf("    %s\n", arg.String()))
@@ -43,7 +43,7 @@ func (r *Repl) String() string {
 	return out.String()
 }
 
-func (a *IntArg) String() string {
+func (a IntArg) String() string {
 	var out strings.Builder
 	out.WriteString("{")
 	out.WriteString(a.Arg.String())
@@ -53,7 +53,7 @@ func (a *IntArg) String() string {
 	return out.String()
 }
 
-func (a *IntSliceArg) String() string {
+func (a IntSliceArg) String() string {
 	var out strings.Builder
 	out.WriteString("{")
 	out.WriteString(a.Arg.String())
@@ -71,7 +71,7 @@ func (a *IntSliceArg) String() string {
 	return out.String()
 }
 
-func (a *StringArg) String() string {
+func (a StringArg) String() string {
 	var out strings.Builder
 	out.WriteString("{")
 	out.WriteString(a.Arg.String())
@@ -81,7 +81,7 @@ func (a *StringArg) String() string {
 	return out.String()
 }
 
-func (a *StringSliceArg) String() string {
+func (a StringSliceArg) String() string {
 	var out strings.Builder
 	out.WriteString("{")
 	out.WriteString(a.Arg.String())
@@ -92,14 +92,14 @@ func (a *StringSliceArg) String() string {
 	out.WriteString(fmt.Sprintf("Default: %s, ", tmpDef))
 	var tmpVal []string
 	for _, v := range a.Value {
-		tmpVal = append(tmpVal, fmt.Sprintf("%q", *v))
+		tmpVal = append(tmpVal, fmt.Sprintf("%q", v))
 	}
 	out.WriteString(fmt.Sprintf("Value: %s, ", tmpVal))
 	out.WriteString("}")
 	return out.String()
 }
 
-func (a *BoolArg) String() string {
+func (a BoolArg) String() string {
 	var out strings.Builder
 	out.WriteString("{")
 	out.WriteString(a.Arg.String())

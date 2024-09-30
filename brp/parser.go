@@ -14,8 +14,8 @@ func confirm() repl.Args {
 		SetHelp("automatically confirm action")
 }
 
-func subCommands() []*repl.Repl {
-	return []*repl.Repl{
+func subCommands() []repl.Repl {
+	return []repl.Repl{
 		HelpParser(),
 		SaveParser(),
 		QuitParser(),
@@ -34,7 +34,7 @@ func subCommands() []*repl.Repl {
 	}
 }
 
-func CliParser(args ...string) (*repl.Repl, error) {
+func CliParser(args ...string) (repl.Repl, error) {
 	var err error
 	// filenames, autos
 	parser := repl.NewRepl("batchrenamer", repl.CliCmd).
@@ -60,18 +60,13 @@ func CliParser(args ...string) (*repl.Repl, error) {
 			SetExactNargs(1).
 			SetHelp("automated files to run"))
 	parser.Cmds = subCommands()
-	parser.Idk = UnknownParser()
 	if len(args) > 0 {
 		err = parser.Parse(args)
 	}
 	return parser, err
 }
 
-func UnknownParser() *repl.Repl {
-	return repl.NewRepl("idk", repl.UnknownCmd)
-}
-
-func HelpParser() *repl.Repl {
+func HelpParser() repl.Repl {
 	// small, commands
 	return repl.NewRepl("help", repl.HelpCmd).
 		SetAliases("h", "?").
@@ -86,7 +81,7 @@ func HelpParser() *repl.Repl {
 			SetHelp("commands to get specific info on"))
 }
 
-func SaveParser() *repl.Repl {
+func SaveParser() repl.Repl {
 	// confirm
 	return repl.NewRepl("save", repl.SaveCmd).
 		SetAliases("s").
@@ -95,7 +90,7 @@ func SaveParser() *repl.Repl {
 		AddArg(confirm())
 }
 
-func QuitParser() *repl.Repl {
+func QuitParser() repl.Repl {
 	// confirm
 	return repl.NewRepl("quit", repl.QuitCmd).
 		SetAliases("q", "exit").
@@ -104,7 +99,7 @@ func QuitParser() *repl.Repl {
 		AddArg(confirm())
 }
 
-func WriteParser() *repl.Repl {
+func WriteParser() repl.Repl {
 	// confirm
 	return repl.NewRepl("write", repl.WriteCmd).
 		SetAliases("w").
@@ -113,14 +108,14 @@ func WriteParser() *repl.Repl {
 		AddArg(confirm())
 }
 
-func ListParser() *repl.Repl {
+func ListParser() repl.Repl {
 	return repl.NewRepl("list", repl.ListCmd).
 		SetAliases("ls", "l").
 		SetUsage("list (ls, l)").
 		SetDesc("lists current files being modified")
 }
 
-func HistoryParser() *repl.Repl {
+func HistoryParser() repl.Repl {
 	// peak
 	return repl.NewRepl("history", repl.HistoryCmd).
 		SetAliases("hist", "past").
@@ -132,7 +127,7 @@ func HistoryParser() *repl.Repl {
 			SetHelp("just show single file history"))
 }
 
-func UndoParser() *repl.Repl {
+func UndoParser() repl.Repl {
 	// number
 	return repl.NewRepl("undo", repl.UndoCmd).
 		SetAliases("u").
@@ -144,7 +139,7 @@ func UndoParser() *repl.Repl {
 			SetHelp("number of changes to undo"))
 }
 
-func ResetParser() *repl.Repl {
+func ResetParser() repl.Repl {
 	// confirm
 	return repl.NewRepl("reset", repl.ResetCmd).
 		SetAliases("over", "o").
@@ -153,7 +148,7 @@ func ResetParser() *repl.Repl {
 		AddArg(confirm())
 }
 
-func AutoParser() *repl.Repl {
+func AutoParser() repl.Repl {
 	return repl.NewRepl("automate", repl.AutoCmd).
 		SetAliases("auto", "a").
 		SetUsage("automate (a, auto) [filenames ...]").
@@ -163,7 +158,7 @@ func AutoParser() *repl.Repl {
 			SetHelp("file names to run commands"))
 }
 
-func ReplaceParser() *repl.Repl {
+func ReplaceParser() repl.Repl {
 	// find, replace
 	return repl.NewRepl("replace", repl.ReplaceCmd).
 		SetAliases("r", "re", "reg", "regex").
@@ -175,7 +170,7 @@ func ReplaceParser() *repl.Repl {
 			SetHelp("pattern to insert"))
 }
 
-func AppendParser() *repl.Repl {
+func AppendParser() repl.Repl {
 	// filenames, padding, append, find
 	return repl.NewRepl("append", repl.AppendCmd).
 		SetAliases("ap").
@@ -197,7 +192,7 @@ func AppendParser() *repl.Repl {
 			SetHelp("regex pattern to match against"))
 }
 
-func PrependParser() *repl.Repl {
+func PrependParser() repl.Repl {
 	// filenames, padding, prepend, find
 	return repl.NewRepl("prepend", repl.PrependCmd).
 		SetAliases("p", "pre").
@@ -219,7 +214,7 @@ func PrependParser() *repl.Repl {
 			SetHelp("regex pattern to match against"))
 }
 
-func InsertParser() *repl.Repl {
+func InsertParser() repl.Repl {
 	// insert, index
 	return repl.NewRepl("insert", repl.InsertCmd).
 		SetAliases("i", "in").
@@ -232,7 +227,7 @@ func InsertParser() *repl.Repl {
 		AddArg(confirm())
 }
 
-func CaseParser() *repl.Repl {
+func CaseParser() repl.Repl {
 	// styles
 	return repl.NewRepl("case", repl.CaseCmd).
 		SetAliases("c").
@@ -243,7 +238,7 @@ func CaseParser() *repl.Repl {
 			SetHelp("type of case style (lower, upper, title, camel, kebab, ect) to switch to"))
 }
 
-func ExtParser() *repl.Repl {
+func ExtParser() repl.Repl {
 	// ext, new, pattern
 	return repl.NewRepl("extension", repl.ExtCmd).
 		SetAliases("x", "ext").
