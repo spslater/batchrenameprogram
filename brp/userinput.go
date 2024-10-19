@@ -231,3 +231,10 @@ func GetAutofiles(args repl.Repl) []string {
 	toks, _ := shlex.Split(readrepl("Filenames: "))
 	return toks
 }
+
+func GetDelete(args repl.Repl) string {
+	var raw_find *string = args.GetValue("delete").(*string)
+	var delete string = getstring(raw_find, "Delete: ")
+
+	return delete
+}

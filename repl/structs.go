@@ -27,6 +27,7 @@ const (
 	InsertCmd
 	CaseCmd
 	ExtCmd
+	DeleteCmd
 )
 
 type Nargs struct {

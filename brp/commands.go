@@ -67,6 +67,8 @@ func RunCmd(cmd repl.Repl, args []string, parser repl.Repl, files []*FileHistory
 		DoCase(cmd, files)
 	case repl.ExtCmd:
 		DoExtension(cmd, files)
+	case repl.DeleteCmd:
+		DoDelete(cmd, files)
 	default:
 		fmt.Printf("Unknown or Invalid Command\n\tPlease try again or type `help` ro `?` to get help\n")
 	}
@@ -322,5 +324,12 @@ func DoExtension(r repl.Repl, files []*FileHistory) {
 	var new, patt = GetExtension(r)
 	for _, file := range files {
 		file.ChangeExt(new, patt, ext)
+	}
+}
+
+func DoDelete(r repl.Repl, files []*FileHistory) {
+	var del string = GetDelete(r)
+	for _, file := range files {
+		file.Delete(del)
 	}
 }

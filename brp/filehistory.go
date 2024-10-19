@@ -209,3 +209,13 @@ func (file FileHistory) MatchName(re *regexp.Regexp) bool {
 func (file FileHistory) MatchExt(re *regexp.Regexp) bool {
 	return re.MatchString(file.previous.ext)
 }
+
+func (file *FileHistory) Delete(delete string) {
+	delp, err := regexp.Compile(delete)
+	if err != nil {
+		fmt.Printf("error: %v\n", err)
+		return
+	}
+	var new_name string = delp.ReplaceAllString(file.rename.name, "")
+	file.pushName(new_name)
+}

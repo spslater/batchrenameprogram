@@ -31,6 +31,7 @@ func subCommands() []repl.Repl {
 		InsertParser(),
 		CaseParser(),
 		ExtParser(),
+		DeleteParser(),
 	}
 }
 
@@ -256,4 +257,14 @@ func ExtParser() repl.Repl {
 			SetHelp("change the extension to this")).
 		AddArg(repl.NewStringArg("pattern").
 			SetHelp("pattern to match against, "))
+}
+
+func DeleteParser() repl.Repl {
+	// delete
+	return repl.NewRepl("delete", repl.DeleteCmd).
+		SetAliases("d", "del").
+		SetUsage("delete (d, del) [delete]").
+		SetDesc("delete pattern based on a regex").
+		AddArg(repl.NewStringArg("delete").
+			SetHelp("pattern to delete"))
 }

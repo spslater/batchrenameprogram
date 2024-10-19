@@ -47,7 +47,7 @@ func main() {
 			break
 		}
 		switch cmd.Id {
-		case repl.CaseCmd, repl.AppendCmd, repl.PrependCmd, repl.UndoCmd, repl.ReplaceCmd, repl.ExtCmd, repl.InsertCmd, repl.AutoCmd:
+		case repl.CaseCmd, repl.AppendCmd, repl.PrependCmd, repl.UndoCmd, repl.ReplaceCmd, repl.ExtCmd, repl.InsertCmd, repl.AutoCmd, repl.DeleteCmd:
 			brp.DoList(files)
 		}
 	}
