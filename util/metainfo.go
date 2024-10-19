@@ -1,6 +1,6 @@
 package util
 
-var Version string = "2.1.0"
+var Version string = "2.3.1"
 
 var Usage string = `brp [-h] [-V] [[-a FILE] ...] filename [filename ...]
 
