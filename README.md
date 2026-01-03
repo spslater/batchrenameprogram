@@ -83,7 +83,7 @@ append (ap) [-f FILENAMES [FILENAMES ...]] [-p PADDING] [append] [find]
   optional arguments:
     -f FILENAMES [FILENAMES ...], --filenames FILENAMES [FILENAMES ...]
                file to load patterns from
-    -p PADDING, --padding PADDING (Default: " ")
+    -p PADDING, --padding PADDING
                string to insert between the end of the filename and the value being appended
 
 prepend (p, pre) [-f FILENAMES [FILENAMES ...]] [-p PADDING] [prepend] [find]
@@ -94,8 +94,8 @@ prepend (p, pre) [-f FILENAMES [FILENAMES ...]] [-p PADDING] [prepend] [find]
   optional arguments:
     -f FILENAMES [FILENAMES ...], --filenames FILENAMES [FILENAMES ...]
                file to load patterns from
-    -p PADDING, --padding PADDING (Default: " ")
-               string to insert between the value being prepended and the beginning of the filename
+    -p PADDING, --padding PADDING
+               string to insert between the end of the filename and the value being prepended
 
 insert (i, in) [insert] [index] [-c]
   insert string, positive from begining, negative from ending
@@ -107,9 +107,12 @@ insert (i, in) [insert] [index] [-c]
                automatically confirm action
 
 case (c) [styles ...]
-  change the case (title, upper, lower) of files
+  change the case of files:
+    upper (u), lower (l), title (t), kebab (k),
+    snake (s), dekebab (dk), desnake (ds), squash (sq),
+    trim (tr), camel (c), pascal (p), unsquash (us)
   positional arguments:
-    styles     type of case style (lower, upper, title, camel, kebab, ect) to switch to
+    styles     type of case style to switch to, performed in order passed
 
 extension (x, ext) [-e] [-n] [new] [pattern]
   change the extension on all files or files that match pattern
@@ -120,7 +123,13 @@ extension (x, ext) [-e] [-n] [new] [pattern]
     -e, --ext  match against the extensions instead of filename
     -n, --np, --nopattern
                change for all files
+
+delete (d, del) [delete]
+  delete pattern based on a regex
+  positional arguments:
+    delete     pattern to delete
 ```
+
 ## Links
 * [Github](https://github.com/spslater/batchrenameprogram)
 

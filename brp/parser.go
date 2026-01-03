@@ -233,17 +233,17 @@ func CaseParser() repl.Repl {
 	return repl.NewRepl("case", repl.CaseCmd).
 		SetAliases("c").
 		SetUsage("case (c) [styles ...]").
-		SetDesc("change the case (title, upper, lower) of files").
+		SetDesc("change the case of files:\n    upper (u), lower (l), title (t), kebab (k),\n    snake (s), dekebab (dk), desnake (ds), squash (sq),\n    trim (tr), camel (c), pascal (p), unsquash (us)").
 		AddArg(repl.NewStringSliceArg("styles").
 			SetNargs('*').
-			SetHelp("type of case style (lower, upper, title, camel, kebab, ect) to switch to"))
+			SetHelp("type of case style to switch to, performed in order passed"))
 }
 
 func ExtParser() repl.Repl {
 	// ext, new, pattern
 	return repl.NewRepl("extension", repl.ExtCmd).
 		SetAliases("x", "ext").
-		SetUsage("extension (x, ext) [-e] [new] [pattern]").
+		SetUsage("extension (x, ext) [-e] [-n] [new] [pattern]").
 		SetDesc("change the extension on all files or files that match pattern").
 		AddArg(repl.NewBoolArg("ext").
 			SetAliases("e").
